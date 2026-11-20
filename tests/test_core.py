@@ -6,7 +6,8 @@ import re
 
 import pytest
 
-from app.core import END, UNK, NGramModel, anonymize, corpus_stats, load_corpus, tokenize, train_model
+from app.core import (END, START, UNK, NGramModel, anonymize, complete, corpus_stats, load_corpus, suggest,
+                      tokenize, train_model)
 
 
 # Milestone 1: Curate an anonymized corpus of administrative medical text.
@@ -60,9 +61,37 @@ def test_milestone_2_the_model_prefers_what_it_has_seen():
 
 
 # Milestone 3: Develop a text generation feature that suggests words based on input.
-@pytest.mark.skip(reason="remove this line when you start milestone 3")
 def test_milestone_3():
-    raise NotImplementedError("write the test for milestone 3")
+    model = train_model()
+    words = [word for word, _ in suggest(model, "Patient called to", top_n=3)]
+    assert len(words) == 3
+    assert set(words) <= {"ask", "cancel", "reschedule", "schedule"}   # the only words that follow it in the corpus
+    assert suggest(model, "Patient called TO") == suggest(model, "patient called to")  # input is cleaned
+
+
+def test_milestone_3_suggestions_are_ranked_and_clean():
+    model = train_model()
+    result = suggest(model, "referral sent", top_n=5)
+    probabilities = [p for _, p in result]
+    assert probabilities == sorted(probabilities, reverse=True) and all(p > 0 for p in probabilities)
+    assert not {START, END, UNK} & {word for word, _ in result}
+    assert result[0][0] == "to"                                  # "referral sent" is always followed by "to"
+    assert not any(word.startswith("<") for word, _ in result)   # no never-seen placeholders as filler
+    assert suggest(model, "referral sent", top_n=0) == []
+    assert suggest(model, "") != []                              # an empty box suggests sentence starters
+
+
+def test_milestone_3_unknown_words_still_get_suggestions():
+    assert len(suggest(train_model(), "zebra quantum", top_n=3)) == 3
+
+
+def test_milestone_3_complete_finishes_a_sentence():
+    model = train_model()
+    sentence = complete(model, "referral sent to")
+    assert sentence.startswith("referral sent to") and len(sentence.split()) > 3
+    assert complete(model, "referral sent to") == sentence       # same input, same output
+    assert len(complete(model, "patient", max_words=2).split()) <= 3
+    assert complete(model, "patient", max_words=0) == "patient"
 
 
 # Milestone 4: Create a CLI for users to interact with the suggestion engine.

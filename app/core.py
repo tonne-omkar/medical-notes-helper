@@ -128,8 +128,44 @@ def train_model(n: int = 3, k: float = 1.0, path: str | Path = CORPUS_PATH) -> N
 
 # --- Milestone 3: Develop a text generation feature that suggests words based on input.
 # Hint: Implement the text generation logic, leveraging your language model to predict words.
-def milestone_3():  # TODO(milestone 3)
-    raise NotImplementedError("TODO(milestone 3)")
+
+def suggest(model: NGramModel, text: str, top_n: int = 3) -> list[tuple[str, float]]:
+    """The top_n most likely next words after `text`, as (word, probability) pairs, best first.
+
+    The text is cleaned the same way as the corpus (lowercased, identifiers replaced), so
+    "Patient called TO" and "patient called to" give the same answer. Ties are broken
+    alphabetically so the output is always the same.
+
+    Only words actually seen after the context are suggested. If there are fewer than top_n,
+    the rest come from a shorter context (backoff), so smoothing's tiny probabilities for
+    never-seen words don't fill the list with noise. The probability shown is still the
+    smoothed P(word | text).
+    """
+    history = tokenize(text)
+    context = model.seen_context(history)
+    chosen: list[str] = []
+    while len(chosen) < top_n:
+        seen = [w for w in model.counts.get(context, {}) if w not in (START, END, UNK) and w not in chosen]
+        chosen += sorted(seen, key=lambda w: (-model.counts[context][w], w))
+        if not context:
+            break
+        context = context[1:]                       # back off to a shorter context
+    return [(w, model.prob(w, history)) for w in chosen[:max(top_n, 0)]]
+
+
+def complete(model: NGramModel, text: str, max_words: int = 12) -> str:
+    """Finish the sentence by repeatedly adding the single most likely next word.
+
+    Stops when the model thinks the sentence is over (</s> is the most likely next token)
+    or after max_words. Always picks the top word, so the same input gives the same output.
+    """
+    words = tokenize(text)
+    for _ in range(max(max_words, 0)):
+        best = max(sorted(model.vocab - {START, UNK}), key=lambda w: model.prob(w, words))
+        if best == END:
+            break
+        words = words + [best]
+    return " ".join(words)
 
 
 # --- Milestone 4: Create a CLI for users to interact with the suggestion engine.
