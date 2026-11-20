@@ -6,6 +6,7 @@ import re
 
 import pytest
 
+from app.cli import main, run_interactive
 from app.core import (END, START, UNK, NGramModel, anonymize, complete, corpus_stats, load_corpus, suggest,
                       tokenize, train_model)
 
@@ -95,7 +96,48 @@ def test_milestone_3_complete_finishes_a_sentence():
 
 
 # Milestone 4: Create a CLI for users to interact with the suggestion engine.
-@pytest.mark.skip(reason="remove this line when you start milestone 4")
-def test_milestone_4():
-    raise NotImplementedError("write the test for milestone 4")
+def test_milestone_4(capsys):
+    main(["suggest", "referral", "sent"])
+    assert "1) to" in capsys.readouterr().out
+    main(["complete", "referral", "sent", "to"])
+    assert capsys.readouterr().out.startswith("referral sent to")
+    main(["stats"])
+    assert "Sentences:" in capsys.readouterr().out
+
+
+def test_milestone_4_options_are_validated(capsys):
+    for bad in (["--order", "0", "stats"], ["suggest", "--top", "0"], ["--smoothing", "-1", "stats"]):
+        with pytest.raises(SystemExit):
+            main(bad)
+    with pytest.raises(SystemExit):
+        main(["--corpus", "no-such-file.txt", "stats"])
+    assert "corpus file not found" in capsys.readouterr().err
+
+
+def test_milestone_4_interactive_session():
+    model = train_model()
+    lines = iter(["patient", "1", "undo", "undo", "undo", "referral sent", "clear", "help", "quit"])
+    output = []
+    final = run_interactive(model, top_n=3, input_fn=lambda prompt: next(lines), output_fn=output.append)
+    text = "\n".join(output)
+    assert final == ""                                         # the draft was cleared before quitting
+    assert "Removed 'patient'." in text and "Nothing to undo." in text
+    assert "Draft: patient" in text and "Draft: referral sent" in text
+
+
+def test_milestone_4_interactive_pick_and_end_of_input():
+    model = train_model()
+    lines = iter(["﻿patient", "1", "9", "0", "²", "in 2 weeks"])   # then input runs out, like Ctrl+D
+    def fake_input(prompt):
+        try:
+            return next(lines)
+        except StopIteration:
+            raise EOFError
+    output = []
+    final = run_interactive(model, top_n=3, input_fn=fake_input, output_fn=output.append)
+    words = final.split()
+    assert words[0] == "patient" and words[2:] == ["²", "in", "2", "weeks"]   # "1" picked a word; 9 and 0 were refused
+    assert len(words) == 6                          # "²" doesn't crash (it is plain text); "in 2 weeks" stays text
+    assert "There is no suggestion 9 right now." in output
+    assert "Final draft:" in output[-1]
 

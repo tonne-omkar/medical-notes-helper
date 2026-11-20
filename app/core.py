@@ -170,5 +170,4 @@ def complete(model: NGramModel, text: str, max_words: int = 12) -> str:
 
 # --- Milestone 4: Create a CLI for users to interact with the suggestion engine.
 # Hint: Use command-line parsing libraries to create an interactive user interface.
-def milestone_4():  # TODO(milestone 4)
-    raise NotImplementedError("TODO(milestone 4)")
+# The command-line interface lives in app/cli.py (argparse commands plus an interactive session).
