@@ -1,5 +1,6 @@
 """Your code. One stub per milestone; build them in order and keep each one small."""
 import re
+from collections import Counter, defaultdict
 from pathlib import Path
 
 # --- Milestone 1: Curate an anonymized corpus of administrative medical text.
@@ -64,8 +65,65 @@ def corpus_stats(sentences: list[list[str]]) -> dict:
 
 # --- Milestone 2: Implement the n-gram language model and apply smoothing.
 # Hint: Apply the n-gram model and smoothing techniques from 'Build a Next-Word Predictor from Scratch'.
-def milestone_2():  # TODO(milestone 2)
-    raise NotImplementedError("TODO(milestone 2)")
+
+START, END, UNK = "<s>", "</s>", "<unk>"   # sentence start padding, sentence end, unknown word
+
+
+class NGramModel:
+    """An n-gram language model with add-k smoothing (k=1 is Laplace, or add-one, smoothing).
+
+    It counts every order from 1 up to n. To score a word it uses the longest context it saw
+    in training: if the last n-1 words never appeared together, it backs off to a shorter
+    context, down to plain word counts (the empty context), which always exist after fit().
+    """
+
+    def __init__(self, n: int = 3, k: float = 1.0):
+        if n < 1:
+            raise ValueError("n must be at least 1")
+        if k <= 0:
+            raise ValueError("k must be greater than 0")
+        self.n, self.k = n, k
+        self.counts: dict[tuple[str, ...], Counter] = defaultdict(Counter)  # context -> next-word counts
+        self.totals: dict[tuple[str, ...], int] = {}                       # context -> sum of those counts
+        self.vocab: set[str] = set()
+
+    def fit(self, sentences: list[list[str]]) -> "NGramModel":
+        for sentence in sentences:
+            words = [START] * (self.n - 1) + list(sentence) + [END]
+            self.vocab.update(sentence)
+            for i in range(self.n - 1, len(words)):
+                for size in range(self.n):                 # context sizes 0 .. n-1
+                    self.counts[tuple(words[i - size:i])][words[i]] += 1
+        self.vocab.update({END, UNK})
+        self.totals = {context: sum(c.values()) for context, c in self.counts.items()}
+        return self
+
+    def context(self, history: list[str]) -> tuple[str, ...]:
+        """The last n-1 words of history, with unknown words as <unk> and <s> padding at the start."""
+        if self.n == 1:
+            return ()
+        words = [START] * (self.n - 1) + [w if w in self.vocab else UNK for w in history]
+        return tuple(words[-(self.n - 1):])
+
+    def seen_context(self, history: list[str]) -> tuple[str, ...]:
+        """The longest end part of the context that appeared in training (backoff)."""
+        context = self.context(history)
+        while context and context not in self.counts:
+            context = context[1:]
+        return context
+
+    def prob(self, word: str, history: list[str] = ()) -> float:
+        """P(word | history) = (count + k) / (total + k * vocabulary size)."""
+        if not self.totals:
+            raise RuntimeError("Call fit() before asking for probabilities.")
+        context = self.seen_context(list(history))
+        count = self.counts[context][word if word in self.vocab else UNK]
+        return (count + self.k) / (self.totals[context] + self.k * len(self.vocab))
+
+
+def train_model(n: int = 3, k: float = 1.0, path: str | Path = CORPUS_PATH) -> NGramModel:
+    """Load and clean the corpus, then fit an n-gram model on it."""
+    return NGramModel(n, k).fit(load_corpus(path))
 
 
 # --- Milestone 3: Develop a text generation feature that suggests words based on input.

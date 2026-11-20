@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from app.core import anonymize, corpus_stats, load_corpus, tokenize
+from app.core import END, UNK, NGramModel, anonymize, corpus_stats, load_corpus, tokenize, train_model
 
 
 # Milestone 1: Curate an anonymized corpus of administrative medical text.
@@ -37,9 +37,26 @@ def test_milestone_1_comments_and_blank_lines_are_skipped(tmp_path):
 
 
 # Milestone 2: Implement the n-gram language model and apply smoothing.
-@pytest.mark.skip(reason="remove this line when you start milestone 2")
 def test_milestone_2():
-    raise NotImplementedError("write the test for milestone 2")
+    model = NGramModel(n=2, k=1).fit([["a", "b"], ["a", "c"]])
+    assert model.vocab == {"a", "b", "c", END, UNK}                    # V = 5
+    assert model.prob("b", ["a"]) == pytest.approx((1 + 1) / (2 + 5))   # seen after "a"
+    assert model.prob("a", ["a"]) == pytest.approx((0 + 1) / (2 + 5))   # never seen after "a", still > 0
+    assert model.prob("a", []) == pytest.approx((2 + 1) / (2 + 5))      # first word of a sentence
+    # "zebra" is unknown, so the context backs off to plain word counts: a=2 b=1 c=1 </s>=2
+    assert model.prob("a", ["zebra"]) == pytest.approx((2 + 1) / (6 + 5))
+
+
+def test_milestone_2_probabilities_sum_to_one():
+    model = train_model()
+    for history in ([], ["referral", "sent", "to"], ["completely", "unknown", "words"]):
+        assert sum(model.prob(word, history) for word in model.vocab) == pytest.approx(1.0)
+
+
+def test_milestone_2_the_model_prefers_what_it_has_seen():
+    model = train_model()
+    assert model.prob("appointment", ["a", "follow-up"]) > model.prob("cardiology", ["a", "follow-up"])
+    assert model.prob("cardiology", ["a", "follow-up"]) > 0
 
 
 # Milestone 3: Develop a text generation feature that suggests words based on input.
