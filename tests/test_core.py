@@ -1,6 +1,4 @@
-"""Your tests. Each milestone in README.md gets one here: write the test first, then make it pass.
-
-They start skipped. Remove the `skip` line as you work on each milestone.
+"""Tests for each milestone in README.md, in order: corpus cleaning, n-gram model, suggestions, command line.
 """
 import re
 
@@ -127,7 +125,7 @@ def test_milestone_4_interactive_session():
 
 def test_milestone_4_interactive_pick_and_end_of_input():
     model = train_model()
-    lines = iter(["﻿patient", "1", "9", "0", "²", "in 2 weeks"])   # then input runs out, like Ctrl+D
+    lines = iter(["\ufeffpatient", "1", "9", "0", "²", "in 2 weeks"])   # then input runs out, like Ctrl+D
     def fake_input(prompt):
         try:
             return next(lines)
