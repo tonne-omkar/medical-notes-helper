@@ -1,0 +1,112 @@
+# Administrative medical note sentences, one per line.
+#
+# Every line here is synthetic: written for this project, not taken from any real patient
+# record. A few lines contain made-up names, dates, phone numbers (reserved 555-01xx
+# numbers), emails (example.com) and record numbers on purpose, so the cleaning step in
+# app/core.py has something to anonymize. They are replaced with placeholders such as
+# <name> and <date> when the corpus is loaded.
+#
+# Lines starting with # and blank lines are ignored.
+
+# Scheduling
+Patient called to schedule a follow-up appointment.
+Patient called to reschedule the follow-up appointment.
+Patient called to cancel the appointment.
+Follow-up appointment scheduled in two weeks.
+Follow-up appointment scheduled in four weeks.
+Follow-up appointment scheduled in three months.
+Appointment confirmed by phone.
+Appointment reminder sent by text message.
+Appointment reminder sent by email.
+Patient did not show for the scheduled appointment.
+No-show letter mailed to the patient.
+Patient was added to the cancellation list.
+Patient arrived late and the appointment was rescheduled.
+Patient checked in at the front desk.
+Patient checked in and the insurance card was scanned.
+Patient requested an earlier appointment.
+Next available appointment offered to the patient.
+Patient declined the offered appointment time.
+Mr. Daniel Reyes called on 03/14/2026 to reschedule his follow-up appointment.
+Appointment confirmed for 2026-04-02 at 9:30 am.
+Mrs. Helen Carter cancelled her appointment scheduled for 04/18/2026.
+Patient arrived at 10:15 am for the 10:00 am appointment.
+Patient can be reached at (212) 555-0142 to confirm the appointment.
+
+# Insurance and billing
+Insurance card verified at check-in.
+Insurance eligibility verified prior to the visit.
+Insurance information updated in the patient record.
+Prior authorization request submitted to the insurance company.
+Prior authorization approved by the insurance company.
+Prior authorization denied and the patient was notified.
+Copay collected at check-in.
+Patient was informed of the outstanding balance.
+Payment plan set up for the outstanding balance.
+Billing statement mailed to the patient.
+Claim resubmitted to the insurance company.
+Patient called with a question about the bill.
+Left a voicemail at 646-555-0187 about the outstanding balance.
+MRN 4482913 was verified at check-in.
+
+# Referrals
+Referral sent to cardiology.
+Referral sent to dermatology.
+Referral sent to physical therapy.
+Referral faxed to the specialist office.
+Referral received from the primary care provider.
+Patient was notified that the referral was approved.
+Specialist office contacted to confirm the referral was received.
+Patient called to ask about the status of the referral.
+Dr. Alan Brooks reviewed the referral on March 3, 2026.
+Referral faxed to Dr. Maria Lopez on 05/06/2026.
+
+# Medical records
+Patient requested a copy of the medical records.
+Records release form signed by the patient.
+Medical records sent to the specialist office.
+Records request received from the insurance company.
+Records request forwarded to the medical records department.
+Patient was informed that the records will be sent within five business days.
+Ms. Priya Nair asked for a copy of her records to be sent to p.nair@example.com.
+
+# Forms and consent
+Consent form signed by the patient.
+Consent form reviewed with the patient.
+New patient intake form completed.
+Patient was asked to update the intake form.
+Privacy notice reviewed and signed by the patient.
+Patient portal access was set up.
+Patient was given instructions to access the patient portal.
+
+# Prescription refills
+Prescription refill request received from the pharmacy.
+Prescription refill request forwarded to the provider.
+Pharmacy was notified that the refill was approved.
+Patient was notified that the refill was sent to the pharmacy.
+Patient was asked to schedule a follow-up appointment before the next refill.
+
+# Lab results
+Lab results received and forwarded to the provider.
+Patient was notified that the lab results are available in the patient portal.
+Patient was asked to schedule a visit to review the results.
+Lab order faxed to the outside lab.
+
+# Calls and messages
+Left a voicemail asking the patient to call the office.
+Patient returned the call and the appointment was confirmed.
+Unable to reach the patient by phone.
+Message sent to the patient through the patient portal.
+Interpreter services requested for the next appointment.
+Transportation services arranged for the next appointment.
+
+# Visit wrap-up and record updates
+Visit summary given to the patient.
+After visit summary printed and given to the patient.
+Patient was given a work note.
+Work note faxed to the employer at the patient request.
+Patient was discharged from the clinic.
+Patient was transferred to another provider.
+Chart was updated with the new contact information.
+Emergency contact information updated in the patient record.
+Patient address updated in the patient record.

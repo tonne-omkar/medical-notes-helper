@@ -14,7 +14,7 @@ The Medical Notes Helper is a CLI tool designed for clinic staff in the Healthca
 
 Tick these off as you go, and commit after each one.
 
-- [ ] **1. Curate an anonymized corpus of administrative medical text.**  
+- [x] **1. Curate an anonymized corpus of administrative medical text.**  
       Hint: Use text processing techniques to clean and prepare your corpus.
 - [ ] **2. Implement the n-gram language model and apply smoothing.**  
       Hint: Apply the n-gram model and smoothing techniques from 'Build a Next-Word Predictor from Scratch'.
